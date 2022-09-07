@@ -1,4 +1,4 @@
-package com.github.nalbion;
+package io.github.nalbion;
 
 import ch.qos.logback.classic.Level;
 import org.junit.jupiter.api.Assertions;

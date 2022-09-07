@@ -1,4 +1,4 @@
-package com.github.nalbion;
+package io.github.nalbion;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
