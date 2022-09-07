@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 class TestAppenderTest {
     public static final Logger logger = LoggerFactory.getLogger(TestAppenderTest.class);
-    private TestAppender testAppender = new TestAppender(true);
+    private final TestAppender testAppender = new TestAppender(true);
 
     @BeforeEach
     void setup() {
