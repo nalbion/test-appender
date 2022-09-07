@@ -12,7 +12,6 @@ For JavaScript applications, refer to [log-dd](https://github.com/nalbion/log-dd
 ## Usage
 
 ```java
-@Test
 class MyTest {
     private TestAppender testAppender = new TestAppender(true);
 
