@@ -1,4 +1,6 @@
 # Test Appender
+![Release Pipeline Status](https://github.com/nalbion/test-appender/actions/workflows/maven-publish.yml/badge.svg)
+[![Sonartype Lift status](https://lift.sonatype.com/api/badge/github.com/nalbion/test-appender)](https://lift.sonatype.com/results/github.com/nalbion/test-appender)
 
 By taking TDD one step further, and specifying what the logging output should look like before writing the code 
 we can expect that the logs will give maintainers clear and useful logs.
