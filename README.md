@@ -9,9 +9,38 @@ For JavaScript applications, refer to [log-dd](https://github.com/nalbion/log-dd
 
 `TestAppender` assumes that the application uses `ch.qos.logback.classic.Logger`, which is the default provided by Spring Boot.
 
+## Installation
+
+This library is available from [Maven Central](https://s01.oss.sonatype.org/) or 
+[Git Hub Packages](https://github.com/nalbion/test-appender/packages)
+
+### Gradle
+```groovy
+dependencies {
+    ...
+    testRuntimeOnly 'io.github.nalbion:test-appender:1.0.0'
+}
+```
+
+### Maven
+```xml
+  <dependencies>
+    ...
+    <dependency>
+      <groupId>io.github.nalbion</groupId>
+      <artifactId>test-appender</artifactId>
+      <version>1.0.0</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+```
+
 ## Usage
 
 ```java
+...
+import io.github.nalbion.TestAppender;
+
 class MyTest {
     private final TestAppender testAppender = new TestAppender(true);
 
