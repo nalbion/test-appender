@@ -59,12 +59,17 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
         this.level = level;
     }
 
-    /** Can be used to adjust the level at which logs are captured */
+    /**
+     * @param level - Can be used to adjust the level at which logs are captured
+     */
     public void setLevel(Level level) {
         this.level = level;
     }
 
-    /** A short-cut for <code>setLevel(level); start();</code> */
+    /**
+     * A short-cut for <code>setLevel(level); start();</code>
+     * @param level - Can be used to adjust the level at which logs are captured
+     */
     public void start(Level level) {
         setLevel(level);
         start();
@@ -95,6 +100,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
 
     /**
      * @param level - can be used to assert what logging output <i>would</i> look like if captured/viewed at that level or higher
+     * @param expected - can be a multi-line string with <code>\n</code> or <code>\r\n</code> terminations.
      */
     public void assertLogs(Level level, String expected) {
         assertLogs(expected, getLoggedLines(level));

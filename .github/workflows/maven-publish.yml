@@ -42,7 +42,7 @@ jobs:
         gpg-passphrase: GPG_PASSPHRASE
 
     - name: Publish package
-      run: mvn --batch-mode -P release deploy nexus-staging:release
+      run: mvn --batch-mode -P release deploy release:prepare nexus-staging:release
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
