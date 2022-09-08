@@ -8,6 +8,7 @@
 
   <name>test-appender</name>
   <url>https://github.com/nalbion/test-appender</url>
+  <description>Allows logging output of Java applications to be tested</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
