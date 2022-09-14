@@ -6,7 +6,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
@@ -109,12 +111,29 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
         assertLogs(expected, getLoggedLines(level));
     }
 
-    public void assertLogs(Predicate<ILoggingEvent> p) {
+    public void assertAnyLog(Predicate<ILoggingEvent> p) {
         if (!events.stream().anyMatch(p)) {
             Assertions.assertEquals("<Predicate>",
                     String.join(System.lineSeparator(), getLoggedLines()),
                     MessageFormatter.format("None of the {} log lines matched", events.size()).getMessage());
         }
+    }
+
+    public void assertLogs(Level level, Function<String, String> mapper, String expected) {
+        String[] mappedLogLines = events.stream()
+                .filter(atLogLevel(level))
+                .map(e -> e.getFormattedMessage())
+                .map(mapper)
+                .toArray(String[]::new);
+        assertLogs(expected, mappedLogLines);
+    }
+
+    public void assertLogs(Function<String, String> mapper, String expected) {
+        String[] mappedLogLines = events.stream()
+                .map(e -> e.getFormattedMessage())
+                .map(mapper)
+                .toArray(String[]::new);
+        assertLogs(expected, mappedLogLines);
     }
 
     public void reset() {

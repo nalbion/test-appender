@@ -4,7 +4,7 @@
 
   <groupId>io.github.nalbion</groupId>
   <artifactId>test-appender</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
 
   <name>test-appender</name>
   <url>https://github.com/nalbion/test-appender</url>
@@ -36,7 +36,7 @@
     <connection>scm:git:git@github.com:nalbion/test-appender.git</connection>
     <developerConnection>scm:git:ssh://github.com:nalbion/test-appender.git</developerConnection>
     <url>https://github.com/nalbion/test-appender/tree/main</url>
-    <tag>v1.0.0</tag>
+    <tag>v1.0.1</tag>
   </scm>
 
   <dependencies>

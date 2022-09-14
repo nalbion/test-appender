@@ -20,7 +20,7 @@ This library is available from [Maven Central](https://s01.oss.sonatype.org/) or
 ```groovy
 dependencies {
     ...
-    testRuntimeOnly 'io.github.nalbion:test-appender:1.0.0'
+    testRuntimeOnly 'io.github.nalbion:test-appender:1.0.1'
 }
 ```
 
@@ -31,7 +31,7 @@ dependencies {
     <dependency>
       <groupId>io.github.nalbion</groupId>
       <artifactId>test-appender</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -42,6 +42,7 @@ dependencies {
 ```java
 ...
 import io.github.nalbion.TestAppender;
+import org.junit.jupiter.api.Test;
 
 class MyTest {
     private final TestAppender testAppender = new TestAppender(true);
@@ -61,15 +62,26 @@ class MyTest {
         testAppender.assertLogs("""
                 Hello World!
                 My application calls log.info() twice.""");
-        
+
         // Check that only some lines are logged at WARN
         testAppender.assertLogs(Level.WARN, "My application calls log.info() twice.");
 
         // Check that at least one of the lines matches a Predicate
-        testAppender.assertLogs(
+        testAppender.assertAnyLogs(
                 TestAppender.atLogLevel(Level.INFO)
                         .and(e -> e.getFormattedMessage().matches("Hello .*!"))
         );
+    }
+
+    @Test
+    void dynamicValues() {
+        // When
+        logger.info("The time is {}", new SimpleDateFormat("HH:mm").format(new Date()));
+        
+        // Then
+        // Handle dynamic values - date/time, random values
+        testAppender.assertLogs(line -> line.replaceFirst("\\b\\d{1,2}:\\d{2}\\b", "hh:mm"),
+                "The time is hh:mm");     
     }
 }
 ```

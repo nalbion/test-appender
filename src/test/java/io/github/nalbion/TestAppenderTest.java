@@ -1,6 +1,9 @@
 package io.github.nalbion;
 
 import ch.qos.logback.classic.Level;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,23 +36,44 @@ class TestAppenderTest {
     }
 
     @Test
-    void shouldAssertLogsWithLambda() {
+    void shouldAssertLogsWithPredicate() {
         // When
         logger.info("Hello {}!", "World");
         logger.warn("My application calls log.info() twice.");
 
         // Then
-        testAppender.assertLogs(
+        testAppender.assertAnyLog(e -> e.getFormattedMessage().matches("Hello .*!"));
+
+        testAppender.assertAnyLog(
                 TestAppender.atLogLevel(Level.INFO)
                 .and(e -> e.getFormattedMessage().matches("Hello .*!"))
         );
 
         Assertions.assertThrows(Throwable.class, () -> {
-            testAppender.assertLogs(
+            testAppender.assertAnyLog(
                     TestAppender.atLogLevel(Level.INFO)
                             .and(e -> e.getFormattedMessage().matches("Not logged"))
             );
         });
+    }
+
+    @Test
+    void shouldAssertLogsWithStringMapper() {
+        // When
+        logger.info("The time is {}", new SimpleDateFormat("HH:mm").format(new Date()));
+        logger.warn("User name: {} {}", "John", "Smith");
+
+        Function<String, String> mapper = line ->
+                line.replaceFirst("\\b\\d{1,2}:\\d{2}\\b", "hh:mm")
+                        .replaceFirst("User name: .*", "User name: <USER NAME>");
+
+        // Then
+        testAppender.assertLogs(mapper,
+                "The time is hh:mm\n"
+                        + "User name: <USER NAME>");
+
+        testAppender.assertLogs(Level.WARN, mapper,
+                "User name: <USER NAME>");
     }
 
     @Test
