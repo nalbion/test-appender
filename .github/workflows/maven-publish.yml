@@ -4,6 +4,7 @@
 name: Release Pipeline
 
 on:
+  workflow_dispatch:
   release:
     types: [created]
 
@@ -25,7 +26,7 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Publish to GitHub Packages Apache Maven
-      run: mvn --batch-mode -P github -s $GITHUB_WORKSPACE/settings.xml
+      run: mvn --batch-mode -P github -s $GITHUB_WORKSPACE/settings.xml deploy
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
