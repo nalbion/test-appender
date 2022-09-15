@@ -4,7 +4,6 @@
 name: Release Pipeline
 
 on:
-  workflow_dispatch:
   release:
     types: [created]
 
@@ -17,18 +16,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-#    - name: Set up Java for publishing to GitHub Packages
-#      uses: actions/setup-java@v3
-#      with:
-#        java-version: '8'
-#        distribution: 'temurin'
-#        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-#        settings-path: ${{ github.workspace }} # location for the settings.xml file
-#
-#    - name: Publish to GitHub Packages Apache Maven
-#      run: mvn --batch-mode -P github -s $GITHUB_WORKSPACE/settings.xml deploy
-#      env:
-#        GITHUB_TOKEN: ${{ github.token }}
+    - name: Set up Java for publishing to GitHub Packages
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
+        settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Publish to GitHub Packages Apache Maven
+      run: mvn --batch-mode -P github -s $GITHUB_WORKSPACE/settings.xml deploy
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Set up Maven Central Repository
       uses: actions/setup-java@v3
