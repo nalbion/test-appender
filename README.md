@@ -20,7 +20,7 @@ This library is available from [Maven Central](https://s01.oss.sonatype.org/) or
 ```groovy
 dependencies {
     ...
-    testRuntimeOnly 'io.github.nalbion:test-appender:1.0.1'
+    testImplementation 'io.github.nalbion:test-appender:1.0.1'
 }
 ```
 
