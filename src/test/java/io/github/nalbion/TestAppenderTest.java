@@ -49,12 +49,42 @@ class TestAppenderTest {
                 .and(e -> e.getFormattedMessage().matches("Hello .*!"))
         );
 
-        Assertions.assertThrows(Throwable.class, () -> {
+        Throwable ex = Assertions.assertThrows(Throwable.class, () -> {
             testAppender.assertAnyLog(
                     TestAppender.atLogLevel(Level.INFO)
                             .and(e -> e.getFormattedMessage().matches("Not logged"))
             );
         });
+
+        Assertions.assertEquals("None of the 2 log lines matched ==> expected: <<Predicate>> "
+                        + "but was: <Hello World!\n"
+                        + "My application calls log.info() twice.>",
+                ex.getMessage().replace(System.lineSeparator(), "\n"));
+    }
+
+    @Test
+    void shouldAssertLogsWithNegativePredicate() {
+        // When
+        logger.info("Hello {}!", "World");
+        logger.warn("My application calls log.info() twice.");
+
+        // Then
+        testAppender.assertNoLog(e -> e.getFormattedMessage().matches("Hi .*!"));
+
+        testAppender.assertNoLog(
+                TestAppender.atLogLevel(Level.INFO)
+                        .and(e -> e.getFormattedMessage().matches("Hi .*!"))
+        );
+
+        Throwable ex = Assertions.assertThrows(Throwable.class, () -> {
+            testAppender.assertNoLog(
+                    TestAppender.atLogLevel(Level.INFO)
+                            .and(e -> e.getFormattedMessage().matches("Hello .*!"))
+            );
+        });
+
+        Assertions.assertEquals("Found 1 matching log line(s) ==> expected: <<No match for Predicate>> "
+                        + "but was: <Hello World!>", ex.getMessage());
     }
 
     @Test

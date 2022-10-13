@@ -119,6 +119,15 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
         }
     }
 
+    public void assertNoLog(Predicate<ILoggingEvent> p) {
+        String[] matches = events.stream().filter(p).map(e -> e.getFormattedMessage()).toArray(String[]::new);
+        if (matches.length != 0) {
+            Assertions.assertEquals("<No match for Predicate>",
+                    String.join(System.lineSeparator(), matches),
+                    MessageFormatter.format("Found {} matching log line(s)", matches.length).getMessage());
+        }
+    }
+
     public void assertLogs(Level level, Function<String, String> mapper, String expected) {
         String[] mappedLogLines = events.stream()
                 .filter(atLogLevel(level))
