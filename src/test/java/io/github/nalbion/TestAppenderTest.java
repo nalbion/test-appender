@@ -45,7 +45,7 @@ class TestAppenderTest {
             logger.info("Message after stacktrace");
 
             testAppender.assertLogs(line ->
-                            line.replaceAll("java.base/jdk.internal([A-Za-z \\d.(]+)(:\\d+)?\\)", "sun$1)"),
+                            line.replaceAll("(?:java.base/jdk.internal|sun)([A-Za-z \\d.(]+)(:\\d+)?\\)", "sun$1)"),
                     "Hello World!\n"
                         + "Caught exception\n"
                         + "java.lang.RuntimeException: Forced error\n"
