@@ -36,6 +36,26 @@ class TestAppenderTest {
     }
 
     @Test
+    void shouldAssertLogsWithStackTrace() {
+        try {
+            logger.info("Hello {}!", "World");
+            throw new RuntimeException("Forced error");
+        } catch (Exception e) {
+            logger.error("Caught exception", e);
+            logger.info("Message after stacktrace");
+
+            testAppender.assertLogs("Hello World!\n"
+                        + "Caught exception\n"
+                        + "java.lang.RuntimeException: Forced error\n"
+                        + "    at io.github.nalbion.TestAppenderTest.shouldAssertLogsWithStackTrace(TestAppenderTest.java:44)\n"
+                        + "    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n"
+                        + "    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n"
+                        + "    at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n"
+                        + "Message after stacktrace");
+        }
+    }
+
+    @Test
     void shouldAssertLogsWithPredicate() {
         // When
         logger.info("Hello {}!", "World");

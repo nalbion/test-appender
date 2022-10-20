@@ -4,7 +4,7 @@
 
   <groupId>io.github.nalbion</groupId>
   <artifactId>test-appender</artifactId>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
 
   <name>test-appender</name>
   <url>https://github.com/nalbion/test-appender</url>

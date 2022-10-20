@@ -20,7 +20,7 @@ This library is available from [Maven Central](https://s01.oss.sonatype.org/) or
 ```groovy
 dependencies {
     ...
-    testImplementation 'io.github.nalbion:test-appender:1.0.2'
+    testImplementation 'io.github.nalbion:test-appender:1.0.3'
 }
 ```
 
@@ -31,7 +31,7 @@ dependencies {
     <dependency>
       <groupId>io.github.nalbion</groupId>
       <artifactId>test-appender</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

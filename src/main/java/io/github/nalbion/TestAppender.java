@@ -3,11 +3,16 @@ package io.github.nalbion;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.IThrowableProxy;
+import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.AppenderBase;
+import ch.qos.logback.core.helpers.ThrowableToStringArray;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.LoggerFactory;
@@ -43,6 +48,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     private final List<ILoggingEvent> events = new ArrayList<>();
     private boolean detachOthers;
     private Level level;
+    private int stackDepth = 4;
 
     public static Predicate<ILoggingEvent> atLogLevel(Level level) {
         return (e) -> e.getLevel().isGreaterOrEqual(level);
@@ -62,7 +68,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     }
 
     /**
-     * Can be used to adjust the level at which logs are captured
+     * Can be used to adjust the level at which logs are captured.
      * @param level - INFO, WARN etc
      */
     public void setLevel(Level level) {
@@ -70,7 +76,17 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     }
 
     /**
-     * A short-cut for <code>setLevel(level); start();</code>
+     * Defaults to 4.
+     *
+     * @param stackDepth
+     */
+    public void setStackDepth(int stackDepth) {
+        this.stackDepth = stackDepth;
+    }
+
+    /**
+     * A short-cut for <code>setLevel(level); start();</code>.
+     *
      * @param level - Can be used to adjust the level at which logs are captured
      */
     public void start(Level level) {
@@ -95,7 +111,8 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     }
 
     /**
-     * Asserts that the captured logs are as expected
+     * Asserts that the captured logs are as expected.
+     *
      * @param expected - can be a multi-line string with <code>\n</code> or <code>\r\n</code> terminations.
      */
     public void assertLogs(String expected) {
@@ -103,7 +120,8 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     }
 
     /**
-     * Can be used to assert what logging output <i>would</i> look like if captured/viewed at that level or higher
+     * Can be used to assert what logging output <i>would</i> look like if captured/viewed at that level or higher.
+     *
      * @param level - INFO, WARN etc
      * @param expected - can be a multi-line string with <code>\n</code> or <code>\r\n</code> terminations.
      */
@@ -120,7 +138,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     }
 
     public void assertNoLog(Predicate<ILoggingEvent> p) {
-        String[] matches = events.stream().filter(p).map(e -> e.getFormattedMessage()).toArray(String[]::new);
+        String[] matches = events.stream().filter(p).map(this::extractFormattedMessage).toArray(String[]::new);
         if (matches.length != 0) {
             Assertions.assertEquals("<No match for Predicate>",
                     String.join(System.lineSeparator(), matches),
@@ -131,7 +149,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     public void assertLogs(Level level, Function<String, String> mapper, String expected) {
         String[] mappedLogLines = events.stream()
                 .filter(atLogLevel(level))
-                .map(e -> e.getFormattedMessage())
+                .map(this::extractFormattedMessage)
                 .map(mapper)
                 .toArray(String[]::new);
         assertLogs(expected, mappedLogLines);
@@ -139,7 +157,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
 
     public void assertLogs(Function<String, String> mapper, String expected) {
         String[] mappedLogLines = events.stream()
-                .map(e -> e.getFormattedMessage())
+                .map(this::extractFormattedMessage)
                 .map(mapper)
                 .toArray(String[]::new);
         assertLogs(expected, mappedLogLines);
@@ -151,9 +169,23 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
 
     @Override
     protected void append(ILoggingEvent loggingEvent) {
-        loggingEvent.getLevel();
-        loggingEvent.getFormattedMessage();
         events.add(loggingEvent);
+    }
+
+    private String extractFormattedMessage(ILoggingEvent e) {
+        String msg = e.getFormattedMessage();
+
+        if (0 != stackDepth && null != e.getThrowableProxy()) {
+            IThrowableProxy ex = e.getThrowableProxy();
+            msg += "\n"
+                    + ex.getClassName() + ": " + ex.getMessage() + "\n"
+                    + Arrays.stream(ex.getStackTraceElementProxyArray())
+                    .limit(stackDepth)
+                    .map(el -> "    " + el.getSTEAsString())
+                    .collect(Collectors.joining("\n"));
+        }
+
+        return msg;
     }
 
     private void assertLogs(String expected, String[] actual) {
@@ -167,11 +199,11 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
     private String[] getLoggedLines(Level level) {
         return events.stream()
                 .filter(atLogLevel(level))
-                .map(e -> e.getFormattedMessage())
+                .map(this::extractFormattedMessage)
                 .toArray(String[]::new);
     }
 
     private String[] getLoggedLines() {
-        return events.stream().map(e -> e.getFormattedMessage()).toArray(String[]::new);
+        return events.stream().map(this::extractFormattedMessage).toArray(String[]::new);
     }
 }
