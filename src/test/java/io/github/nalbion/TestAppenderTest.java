@@ -44,13 +44,15 @@ class TestAppenderTest {
             logger.error("Caught exception", e);
             logger.info("Message after stacktrace");
 
-            testAppender.assertLogs("Hello World!\n"
+            testAppender.assertLogs(line ->
+                            line.replaceAll("java.base/jdk.internal([A-Za-z \\d.(]+)(:\\d+)?\\)", "sun$1)"),
+                    "Hello World!\n"
                         + "Caught exception\n"
                         + "java.lang.RuntimeException: Forced error\n"
-                        + "    at io.github.nalbion.TestAppenderTest.shouldAssertLogsWithStackTrace(TestAppenderTest.java:44)\n"
-                        + "    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n"
-                        + "    at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)\n"
-                        + "    at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n"
+                        + "    at io.github.nalbion.TestAppenderTest.shouldAssertLogsWithStackTrace(TestAppenderTest.java:42)\n"
+                        + "    at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n"
+                        + "    at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java)\n"
+                        + "    at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java)\n"
                         + "Message after stacktrace");
         }
     }
