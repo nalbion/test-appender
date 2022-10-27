@@ -4,23 +4,20 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
-import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.AppenderBase;
-import ch.qos.logback.core.helpers.ThrowableToStringArray;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
 /**
- * Allows logging output to be tested. Assumes that the application uses {@link Logger},
- * which is the default provided by Spring Boot.
+ * Allows logging output to be tested.
+ * Assumes that the application uses {@link Logger}, which is the default provided by Spring Boot.
  *
  * <pre>
  * private TestAppender testAppender = new TestAppender(true);
@@ -42,19 +39,21 @@ import org.slf4j.helpers.MessageFormatter;
  * }
  * </pre>
  *
- * Based on <a href="https://kotlintesting.com/mock-slf4j/">Jaroslaw Michalik's article</a>
+ * <p>Copied from <a href="https://github.com/nalbion/test-appender">Test Appender</a></p>
  */
 public class TestAppender extends AppenderBase<ILoggingEvent> {
     private final List<ILoggingEvent> events = new ArrayList<>();
-    private boolean detachOthers;
+    private final boolean detachOthers;
     private Level level;
     private int stackDepth = 4;
 
     public static Predicate<ILoggingEvent> atLogLevel(Level level) {
-        return (e) -> e.getLevel().isGreaterOrEqual(level);
+        return e -> e.getLevel().isGreaterOrEqual(level);
     }
 
     /**
+     * Create TestAppender.
+     *
      * @param detachOthers If true, will disable all other loggers for the duration of the test.
      *                     This can make the test logs a lot less noisy.
      */
@@ -69,6 +68,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
 
     /**
      * Can be used to adjust the level at which logs are captured.
+     *
      * @param level - INFO, WARN etc
      */
     public void setLevel(Level level) {
@@ -77,8 +77,6 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
 
     /**
      * Defaults to 4.
-     *
-     * @param stackDepth
      */
     public void setStackDepth(int stackDepth) {
         this.stackDepth = stackDepth;
@@ -116,7 +114,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
      * @param expected - can be a multi-line string with <code>\n</code> or <code>\r\n</code> terminations.
      */
     public void assertLogs(String expected) {
-        assertLogs(expected, getLoggedLines());
+        assertLogsInternal(expected, getLoggedLines());
     }
 
     /**
@@ -126,7 +124,24 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
      * @param expected - can be a multi-line string with <code>\n</code> or <code>\r\n</code> terminations.
      */
     public void assertLogs(Level level, String expected) {
-        assertLogs(expected, getLoggedLines(level));
+        assertLogsInternal(expected, getLoggedLines(level));
+    }
+
+    public void assertLogs(Level level, Function<String, String> mapper, String expected) {
+        String[] mappedLogLines = events.stream()
+                .filter(atLogLevel(level))
+                .map(this::extractFormattedMessage)
+                .map(mapper)
+                .toArray(String[]::new);
+        assertLogsInternal(expected, mappedLogLines);
+    }
+
+    public void assertLogs(Function<String, String> mapper, String expected) {
+        String[] mappedLogLines = events.stream()
+                .map(this::extractFormattedMessage)
+                .map(mapper)
+                .toArray(String[]::new);
+        assertLogsInternal(expected, mappedLogLines);
     }
 
     public void assertAnyLog(Predicate<ILoggingEvent> p) {
@@ -144,23 +159,6 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
                     String.join(System.lineSeparator(), matches),
                     MessageFormatter.format("Found {} matching log line(s)", matches.length).getMessage());
         }
-    }
-
-    public void assertLogs(Level level, Function<String, String> mapper, String expected) {
-        String[] mappedLogLines = events.stream()
-                .filter(atLogLevel(level))
-                .map(this::extractFormattedMessage)
-                .map(mapper)
-                .toArray(String[]::new);
-        assertLogs(expected, mappedLogLines);
-    }
-
-    public void assertLogs(Function<String, String> mapper, String expected) {
-        String[] mappedLogLines = events.stream()
-                .map(this::extractFormattedMessage)
-                .map(mapper)
-                .toArray(String[]::new);
-        assertLogs(expected, mappedLogLines);
     }
 
     public void reset() {
@@ -188,7 +186,7 @@ public class TestAppender extends AppenderBase<ILoggingEvent> {
         return msg;
     }
 
-    private void assertLogs(String expected, String[] actual) {
+    private void assertLogsInternal(String expected, String[] actual) {
         if (!System.lineSeparator().equals("\n")) {
             expected = expected.replace(System.lineSeparator(), "\n");
         }
